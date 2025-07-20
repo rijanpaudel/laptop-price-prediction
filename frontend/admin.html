@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Laptop Price Predictor</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">Admin Dashboard</div>
+        <ul>
+            <li><a href="admin.html">Dashboard</a></li>
+            <li><a href="admin-users.html">Users</a></li>
+            <li><a href="admin-predictions.html">Predictions</a></li>
+            <li><a href="index.html">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <div class="admin-container">
+            <div class="admin-stats">
+                <div class="stat-card">
+                    <h3>Total Users</h3>
+                    <p>1,234</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Predictions Made</h3>
+                    <p>5,678</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Accuracy Rate</h3>
+                    <p>92%</p>
+                </div>
+            </div>
+
+            <div class="admin-recent">
+                <h2>Recent Predictions</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Laptop Specs</th>
+                            <th>Predicted Price</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentPredictions">
+                        <!-- Populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Laptop Price Predictor. All rights reserved.</p>
+    </footer>
+
+    <script src="admin.js"></script>
+</body>
+</html>

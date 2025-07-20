@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Laptop Price | LaptopPriceAI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .nav-brand i {
+            margin-right: 0.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .prediction-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card h2 {
+            margin-bottom: 1.5rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+        }
+
+        .card h2 i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group label i {
+            margin-right: 0.5rem;
+            color: #667eea;
+        }
+
+        .tooltip {
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 0.5rem;
+            cursor: help;
+        }
+
+        select, input[type="number"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        select:focus, input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .range-input {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .range-input input[type="range"] {
+            flex: 1;
+        }
+
+        .range-input input[type="number"] {
+            width: 100px;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .radio-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .radio-label:hover {
+            border-color: #667eea;
+        }
+
+        .radio-label input {
+            margin-right: 0.5rem;
+        }
+
+        .radio-label:has(input:checked) {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            width: 100%;
+            transition: transform 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn i {
+            margin-right: 0.5rem;
+        }
+
+        .result-card {
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .initial-state {
+            text-align: center;
+            color: #666;
+        }
+
+        .initial-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+
+        .prediction-card {
+            text-align: center;
+            width: 100%;
+        }
+
+        .prediction-card h3 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .price {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .confidence {
+            margin-bottom: 1rem;
+        }
+
+        .confidence-bar {
+            background: #e1e5e9;
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .confidence-level {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.5s ease;
+        }
+
+        .price-range {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-top: 1rem;
+        }
+
+        .loading {
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(231, 76, 60, 0.1);
+            border-radius: 10px;
+        }
+
+        .error-message i {
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .prediction-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-laptop-code"></i>
+            <span>LaptopPriceAI</span>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="prediction-page">
+        <div class="container">
+            <div class="prediction-grid">
+                <!-- Prediction Form Section -->
+                <section class="prediction-form-section">
+                    <div class="card">
+                        <h2><i class="fas fa-laptop"></i> Laptop Specifications</h2>
+                        <form id="predictionForm" class="prediction-form">
+                            <!-- Company Selection -->
+                            <div class="form-group">
+                                <label for="company">
+                                    <i class="fas fa-building"></i> Company
+                                    <span class="tooltip" data-tooltip="Select the laptop manufacturer">?</span>
+                                </label>
+                                <select id="company" name="company" required>
+                                    <option value="">Select Company</option>
+                                    <option value="Apple">Apple</option>
+                                    <option value="HP">HP</option>
+                                    <option value="Dell">Dell</option>
+                                    <option value="Lenovo">Lenovo</option>
+                                    <option value="Asus">Asus</option>
+                                    <option value="Acer">Acer</option>
+                                    <option value="MSI">MSI</option>
+                                    <option value="Toshiba">Toshiba</option>
+                                    <option value="Samsung">Samsung</option>
+                                </select>
+                            </div>
+
+                            <!-- Type Selection -->
+                            <div class="form-group">
+                                <label for="typename">
+                                    <i class="fas fa-tag"></i> Type
+                                    <span class="tooltip" data-tooltip="Select the laptop type">?</span>
+                                </label>
+                                <select id="typename" name="typename" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Ultrabook">Ultrabook</option>
+                                    <option value="Notebook">Notebook</option>
+                                    <option value="Gaming">Gaming</option>
+                                    <option value="2 in 1 Convertible">2 in 1 Convertible</option>
+                                    <option value="Workstation">Workstation</option>
+                                </select>
+                            </div>
+
+                            <!-- Screen Size -->
+                            <div class="form-group">
+                                <label for="inches">
+                                    <i class="fas fa-tv"></i> Screen Size (inches)
+                                    <span class="tooltip" data-tooltip="Enter screen size in inches">?</span>
+                                </label>
+                                <div class="range-input">
+                                    <input type="range" id="inchesRange" min="11" max="17" step="0.1" value="15.6">
+                                    <input type="number" id="inches" name="inches" min="11" max="17" step="0.1" value="15.6" required>
+                                </div>
+                            </div>
+
+                            <!-- Screen Resolution -->
+                            <div class="form-group">
+                                <label for="screenResolution">
+                                    <i class="fas fa-desktop"></i> Screen Resolution
+                                    <span class="tooltip" data-tooltip="Select screen resolution">?</span>
+                                </label>
+                                <select id="screenResolution" name="screenResolution" required>
+                                    <option value="">Select Resolution</option>
+                                    <option value="1366x768">1366x768</option>
+                                    <option value="1600x900">1600x900</option>
+                                    <option value="1920x1080">1920x1080 (Full HD)</option>
+                                    <option value="2560x1440">2560x1440 (QHD)</option>
+                                    <option value="3840x2160">3840x2160 (4K)</option>
+                                </select>
+                            </div>
+
+                            <!-- CPU Selection -->
+                            <div class="form-group">
+                                <label for="cpu">
+                                    <i class="fas fa-microchip"></i> CPU
+                                    <span class="tooltip" data-tooltip="Select the CPU model">?</span>
+                                </label>
+                                <select id="cpu" name="cpu" required>
+                                    <option value="">Select CPU</option>
+                                    <optgroup label="Intel Core">
+                                        <option value="Intel Core i3">Intel Core i3</option>
+                                        <option value="Intel Core i5">Intel Core i5</option>
+                                        <option value="Intel Core i7">Intel Core i7</option>
+                                        <option value="Intel Core i9">Intel Core i9</option>
+                                    </optgroup>
+                                    <optgroup label="AMD">
+                                        <option value="AMD Processor">AMD Processor</option>
+                                        <option value="AMD A6">AMD A6</option>
+                                        <option value="AMD A8">AMD A8</option>
+                                        <option value="AMD A10">AMD A10</option>
+                                        <option value="AMD A12">AMD A12</option>
+                                    </optgroup>
+                                    <optgroup label="Other">
+                                        <option value="Other Intel Processor">Other Intel Processor</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <!-- RAM Input -->
+                            <div class="form-group">
+                                <label for="ram">
+                                    <i class="fas fa-memory"></i> RAM (GB)
+                                    <span class="tooltip" data-tooltip="Enter RAM size in GB">?</span>
+                                </label>
+                                <div class="range-input">
+                                    <input type="range" id="ramRange" min="2" max="64" step="2" value="8">
+                                    <input type="number" id="ram" name="ram" min="2" max="64" value="8" required>
+                                </div>
+                            </div>
+
+                            <!-- Memory/Storage -->
+                            <div class="form-group">
+                                <label for="memory">
+                                    <i class="fas fa-hdd"></i> Storage
+                                    <span class="tooltip" data-tooltip="Select storage type and capacity">?</span>
+                                </label>
+                                <select id="memory" name="memory" required>
+                                    <option value="">Select Storage</option>
+                                    <option value="128GB SSD">128GB SSD</option>
+                                    <option value="256GB SSD">256GB SSD</option>
+                                    <option value="512GB SSD">512GB SSD</option>
+                                    <option value="1TB SSD">1TB SSD</option>
+                                    <option value="2TB SSD">2TB SSD</option>
+                                    <option value="500GB HDD">500GB HDD</option>
+                                    <option value="1TB HDD">1TB HDD</option>
+                                    <option value="2TB HDD">2TB HDD</option>
+                                    <option value="128GB SSD + 1TB HDD">128GB SSD + 1TB HDD</option>
+                                    <option value="256GB SSD + 1TB HDD">256GB SSD + 1TB HDD</option>
+                                    <option value="512GB SSD + 1TB HDD">512GB SSD + 1TB HDD</option>
+                                </select>
+                            </div>
+
+                            <!-- GPU Selection -->
+                            <div class="form-group">
+                                <label for="gpu">
+                                    <i class="fas fa-desktop"></i> GPU
+                                    <span class="tooltip" data-tooltip="Select graphics card">?</span>
+                                </label>
+                                <select id="gpu" name="gpu" required>
+                                    <option value="">Select GPU</option>
+                                    <optgroup label="Intel">
+                                        <option value="Intel Integrated Graphics">Intel Integrated Graphics</option>
+                                        <option value="Intel HD Graphics">Intel HD Graphics</option>
+                                        <option value="Intel Iris">Intel Iris</option>
+                                    </optgroup>
+                                    <optgroup label="AMD">
+                                        <option value="AMD Radeon">AMD Radeon</option>
+                                    </optgroup>
+                                    <optgroup label="NVIDIA">
+                                        <option value="NVIDIA GeForce">NVIDIA GeForce</option>
+                                        <option value="NVIDIA GTX">NVIDIA GTX</option>
+                                        <option value="NVIDIA RTX">NVIDIA RTX</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <!-- Weight Input -->
+                            <div class="form-group">
+                                <label for="weight">
+                                    <i class="fas fa-weight"></i> Weight (kg)
+                                    <span class="tooltip" data-tooltip="Enter laptop weight in kg">?</span>
+                                </label>
+                                <div class="range-input">
+                                    <input type="range" id="weightRange" min="1.0" max="5.0" step="0.1" value="2.0">
+                                    <input type="number" id="weight" name="weight" min="1.0" max="5.0" step="0.1" value="2.0" required>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-predict">
+                                <i class="fas fa-calculator"></i> Predict Price
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- Prediction Results Section -->
+                <section class="prediction-results-section">
+                    <div class="card result-card" id="predictionResult">
+                        <div class="initial-state">
+                            <i class="fas fa-arrow-left"></i>
+                            <p>Fill in the specifications to get a price prediction</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        class LaptopPricePredictor {
+            constructor() {
+                this.form = document.getElementById("predictionForm");
+                this.resultDiv = document.getElementById("predictionResult");
+                this.init();
+            }
+
+            init() {
+                this.form.addEventListener("submit", (e) => this.handleSubmit(e));
+                this.setupRangeInputs();
+            }
+
+            setupRangeInputs() {
+                // Sync range inputs with number inputs
+                const syncInputs = [
+                    { range: 'inchesRange', number: 'inches' },
+                    { range: 'ramRange', number: 'ram' },
+                    { range: 'weightRange', number: 'weight' }
+                ];
+
+                syncInputs.forEach(({ range, number }) => {
+                    const rangeInput = document.getElementById(range);
+                    const numberInput = document.getElementById(number);
+
+                    rangeInput.addEventListener('input', () => {
+                        numberInput.value = rangeInput.value;
+                    });
+
+                    numberInput.addEventListener('input', () => {
+                        rangeInput.value = numberInput.value;
+                    });
+                });
+            }
+
+            handleSubmit(e) {
+                e.preventDefault();
+
+                // Show loading state
+                this.showLoading();
+
+                // Get form data
+                const formData = new FormData(this.form);
+                const specs = Object.fromEntries(formData.entries());
+
+                // Convert numeric fields
+                specs.inches = parseFloat(specs.inches);
+                specs.ram = parseInt(specs.ram);
+                specs.weight = parseFloat(specs.weight);
+
+                console.log('Sending specs:', specs);
+
+                fetch("http://localhost:4000/api/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(specs),
+                })
+                .then((response) => response.json())
+                .then((prediction) => {
+                    console.log('Received prediction:', prediction);
+                    if (prediction.error) {
+                        this.showError(prediction.error);
+                    } else {
+                        this.showPrediction(prediction);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    this.showError("Error contacting server. Make sure the Flask backend is running on port 4000.");
+                });
+            }
+             
+            showPrediction(prediction) {
+                this.resultDiv.innerHTML = `
+                    <div class="prediction-card">
+                        <h3>Estimated Price</h3>
+                        <div class="price">$${prediction.estimatedPrice.toLocaleString()}</div>
+                        <div class="confidence">
+                            Confidence: ${prediction.confidence}%
+                            <div class="confidence-bar">
+                                <div class="confidence-level" style="width: ${prediction.confidence}%"></div>
+                            </div>
+                        </div>
+                        <div class="price-range">
+                            Price Range: $${prediction.priceRange.low.toLocaleString()} - $${prediction.priceRange.high.toLocaleString()}
+                        </div>
+                    </div>
+                `;
+            }
+
+            showLoading() {
+                this.resultDiv.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Calculating prediction...</p>
+                    </div>
+                `;
+            }
+
+            showError(message) {
+                this.resultDiv.innerHTML = `
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-circle"></i>
+                        ${message}
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize predictor when document is ready
+        document.addEventListener("DOMContentLoaded", () => {
+            new LaptopPricePredictor();
+        });
+    </script>
+</body>
+</html>

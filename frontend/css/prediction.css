@@ -1,0 +1,278 @@
+/* Prediction Page Specific Styles */
+.prediction-page {
+    padding: 6rem 2rem 2rem;
+    min-height: 100vh;
+    background: var(--background);
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.prediction-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Card Styles */
+.card {
+    background: var(--white);
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: var(--shadow);
+}
+
+.card h2 {
+    color: var(--primary-color);
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Form Styles */
+.prediction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.form-group select,
+.form-group input[type="number"] {
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: var(--transition);
+}
+
+.form-group select:focus,
+.form-group input[type="number"]:focus {
+    border-color: var(--primary-color);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Range Input Styles */
+.range-input {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 1rem;
+    align-items: center;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    -webkit-appearance: none;
+    background: #ddd;
+    border-radius: 3px;
+    outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+/* Radio Group Styles */
+.radio-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/* Tooltip Styles */
+.tooltip {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    background: var(--light-text);
+    color: var(--white);
+    border-radius: 50%;
+    text-align: center;
+    line-height: 16px;
+    font-size: 12px;
+    cursor: help;
+}
+
+.tooltip:hover::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem;
+    background: var(--text-color);
+    color: var(--white);
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+/* Prediction Result Styles */
+.result-card {
+    min-height: 300px;
+}
+
+.initial-state {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    color: var(--light-text);
+}
+
+.initial-state i {
+    font-size: 3rem;
+}
+
+.prediction-result {
+    text-align: center;
+}
+
+.predicted-price {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin: 1rem 0;
+}
+
+.confidence-bar {
+    width: 100%;
+    height: 6px;
+    background: #ddd;
+    border-radius: 3px;
+    margin: 0.5rem 0;
+    overflow: hidden;
+}
+
+.confidence-level {
+    height: 100%;
+    background: var(--primary-color);
+    transition: width 0.5s ease;
+}
+
+/* Market Analysis Styles */
+.analysis-card {
+    margin-top: 2rem;
+}
+
+.market-insights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.insight {
+    text-align: center;
+    padding: 1rem;
+    background: var(--background);
+    border-radius: 0.5rem;
+}
+
+.insight i {
+    font-size: 1.5rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+/* Similar Models Styles */
+.similar-models {
+    margin-top: 2rem;
+}
+
+.models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.model-card {
+    background: var(--white);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.model-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Responsive Styles */
+@media screen and (max-width: 1024px) {
+    .prediction-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .prediction-page {
+        padding: 5rem 1rem 1rem;
+    }
+
+    .market-insights {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+    .card {
+        background: #2d3748;
+    }
+
+    .form-group select,
+    .form-group input[type="number"] {
+        background: #2d3748;
+        border-color: #4a5568;
+        color: var(--white);
+    }
+
+    .insight {
+        background: #2d3748;
+    }
+
+    .model-card {
+        background: #2d3748;
+    }
+}

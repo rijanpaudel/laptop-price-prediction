@@ -1,0 +1,2598 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings('ignore')
+df=pd.read_csv('laptop_data.csv')
+df.head()
+Company	TypeName	Inches	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price
+0	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8GB	128GB SSD	Intel Iris Plus Graphics 640	1.37kg	71378.6832
+1	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	128GB Flash Storage	Intel HD Graphics 6000	1.34kg	47895.5232
+2	HP	Notebook	15.6	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8GB	256GB SSD	Intel HD Graphics 620	1.86kg	30636.0000
+3	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16GB	512GB SSD	AMD Radeon Pro 455	1.83kg	135195.3360
+4	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8GB	256GB SSD	Intel Iris Plus Graphics 650	1.37kg	96095.8080
+df.shape
+(1303, 10)
+df.isnull().sum()
+0
+Company	0
+TypeName	0
+Inches	0
+ScreenResolution	0
+Cpu	0
+Ram	0
+Memory	0
+Gpu	0
+Weight	0
+Price	0
+
+dtype: int64
+Removing Duplicate Values
+df.duplicated().sum()
+30
+df.drop_duplicates(inplace=True)
+df.duplicated().sum()
+0
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1273 entries, 0 to 1273
+Data columns (total 10 columns):
+ #   Column            Non-Null Count  Dtype  
+---  ------            --------------  -----  
+ 0   Company           1273 non-null   object 
+ 1   TypeName          1273 non-null   object 
+ 2   Inches            1273 non-null   float64
+ 3   ScreenResolution  1273 non-null   object 
+ 4   Cpu               1273 non-null   object 
+ 5   Ram               1273 non-null   object 
+ 6   Memory            1273 non-null   object 
+ 7   Gpu               1273 non-null   object 
+ 8   Weight            1273 non-null   object 
+ 9   Price             1273 non-null   float64
+dtypes: float64(2), object(8)
+memory usage: 109.4+ KB
+Data Pre-Processing with Visualizations
+df['Screen x & y']=df['ScreenResolution'].str.split(" ").str.get(-1)
+df.head(10)
+Company	TypeName	Inches	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	Screen x & y
+0	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8GB	128GB SSD	Intel Iris Plus Graphics 640	1.37kg	71378.6832	2560x1600
+1	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	128GB Flash Storage	Intel HD Graphics 6000	1.34kg	47895.5232	1440x900
+2	HP	Notebook	15.6	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8GB	256GB SSD	Intel HD Graphics 620	1.86kg	30636.0000	1920x1080
+3	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16GB	512GB SSD	AMD Radeon Pro 455	1.83kg	135195.3360	2880x1800
+4	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8GB	256GB SSD	Intel Iris Plus Graphics 650	1.37kg	96095.8080	2560x1600
+5	Acer	Notebook	15.6	1366x768	AMD A9-Series 9420 3GHz	4GB	500GB HDD	AMD Radeon R5	2.1kg	21312.0000	1366x768
+6	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.2GHz	16GB	256GB Flash Storage	Intel Iris Pro Graphics	2.04kg	114017.6016	2880x1800
+7	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	256GB Flash Storage	Intel HD Graphics 6000	1.34kg	61735.5360	1440x900
+8	Asus	Ultrabook	14.0	Full HD 1920x1080	Intel Core i7 8550U 1.8GHz	16GB	512GB SSD	Nvidia GeForce MX150	1.3kg	79653.6000	1920x1080
+9	Acer	Ultrabook	14.0	IPS Panel Full HD 1920x1080	Intel Core i5 8250U 1.6GHz	8GB	256GB SSD	Intel UHD Graphics 620	1.6kg	41025.6000	1920x1080
+df['x resolution']=df['Screen x & y'].str.split('x').str.get(0)
+df['y resolution']=df['Screen x & y'].str.split('x').str.get(1)
+df.drop('Screen x & y', axis=1, inplace=True)
+df.head(10)
+Company	TypeName	Inches	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	x resolution	y resolution
+0	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8GB	128GB SSD	Intel Iris Plus Graphics 640	1.37kg	71378.6832	2560	1600
+1	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	128GB Flash Storage	Intel HD Graphics 6000	1.34kg	47895.5232	1440	900
+2	HP	Notebook	15.6	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8GB	256GB SSD	Intel HD Graphics 620	1.86kg	30636.0000	1920	1080
+3	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16GB	512GB SSD	AMD Radeon Pro 455	1.83kg	135195.3360	2880	1800
+4	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8GB	256GB SSD	Intel Iris Plus Graphics 650	1.37kg	96095.8080	2560	1600
+5	Acer	Notebook	15.6	1366x768	AMD A9-Series 9420 3GHz	4GB	500GB HDD	AMD Radeon R5	2.1kg	21312.0000	1366	768
+6	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.2GHz	16GB	256GB Flash Storage	Intel Iris Pro Graphics	2.04kg	114017.6016	2880	1800
+7	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	256GB Flash Storage	Intel HD Graphics 6000	1.34kg	61735.5360	1440	900
+8	Asus	Ultrabook	14.0	Full HD 1920x1080	Intel Core i7 8550U 1.8GHz	16GB	512GB SSD	Nvidia GeForce MX150	1.3kg	79653.6000	1920	1080
+9	Acer	Ultrabook	14.0	IPS Panel Full HD 1920x1080	Intel Core i5 8250U 1.6GHz	8GB	256GB SSD	Intel UHD Graphics 620	1.6kg	41025.6000	1920	1080
+df[['x resolution','y resolution']]=df[['x resolution','y resolution']].astype(int)
+df.info()
+<class 'pandas.core.frame.DataFrame'>
+Index: 1273 entries, 0 to 1273
+Data columns (total 12 columns):
+ #   Column            Non-Null Count  Dtype  
+---  ------            --------------  -----  
+ 0   Company           1273 non-null   object 
+ 1   TypeName          1273 non-null   object 
+ 2   Inches            1273 non-null   float64
+ 3   ScreenResolution  1273 non-null   object 
+ 4   Cpu               1273 non-null   object 
+ 5   Ram               1273 non-null   object 
+ 6   Memory            1273 non-null   object 
+ 7   Gpu               1273 non-null   object 
+ 8   Weight            1273 non-null   object 
+ 9   Price             1273 non-null   float64
+ 10  x resolution      1273 non-null   int64  
+ 11  y resolution      1273 non-null   int64  
+dtypes: float64(2), int64(2), object(8)
+memory usage: 129.3+ KB
+df.corr(numeric_only=True)['Price']
+Price
+Inches	0.067109
+Price	1.000000
+x resolution	0.552074
+y resolution	0.548111
+
+dtype: float64
+x resolution and y resolution have very good corelation with price so it is imp to keep it
+
+plt.figure(figsize=(10,9))
+sns.stripplot(x=df['x resolution'],y=df['Price'])
+plt.show()
+No description has been provided for this image
+plt.figure(figsize=(10,9))
+sns.stripplot(x=df['y resolution'],y=df['Price'])
+plt.show()
+No description has been provided for this image
+df['ppi'] = ((df['x resolution']**2 + df['y resolution']**2)**0.5 / df['Inches']).round(2).astype('float')
+
+df.head(10)
+Company	TypeName	Inches	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	x resolution	y resolution	ppi
+0	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8GB	128GB SSD	Intel Iris Plus Graphics 640	1.37kg	71378.6832	2560	1600	226.98
+1	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	128GB Flash Storage	Intel HD Graphics 6000	1.34kg	47895.5232	1440	900	127.68
+2	HP	Notebook	15.6	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8GB	256GB SSD	Intel HD Graphics 620	1.86kg	30636.0000	1920	1080	141.21
+3	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16GB	512GB SSD	AMD Radeon Pro 455	1.83kg	135195.3360	2880	1800	220.53
+4	Apple	Ultrabook	13.3	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8GB	256GB SSD	Intel Iris Plus Graphics 650	1.37kg	96095.8080	2560	1600	226.98
+5	Acer	Notebook	15.6	1366x768	AMD A9-Series 9420 3GHz	4GB	500GB HDD	AMD Radeon R5	2.1kg	21312.0000	1366	768	100.45
+6	Apple	Ultrabook	15.4	IPS Panel Retina Display 2880x1800	Intel Core i7 2.2GHz	16GB	256GB Flash Storage	Intel Iris Pro Graphics	2.04kg	114017.6016	2880	1800	220.53
+7	Apple	Ultrabook	13.3	1440x900	Intel Core i5 1.8GHz	8GB	256GB Flash Storage	Intel HD Graphics 6000	1.34kg	61735.5360	1440	900	127.68
+8	Asus	Ultrabook	14.0	Full HD 1920x1080	Intel Core i7 8550U 1.8GHz	16GB	512GB SSD	Nvidia GeForce MX150	1.3kg	79653.6000	1920	1080	157.35
+9	Acer	Ultrabook	14.0	IPS Panel Full HD 1920x1080	Intel Core i5 8250U 1.6GHz	8GB	256GB SSD	Intel UHD Graphics 620	1.6kg	41025.6000	1920	1080	157.35
+df.corr(numeric_only=True)['Price']
+Price
+Inches	0.067109
+Price	1.000000
+x resolution	0.552074
+y resolution	0.548111
+ppi	0.469564
+
+dtype: float64
+ppi have very good corelation with price so it is imp to keep it
+
+df.drop(columns=['Inches','x resolution','y resolution'],inplace=True)
+df.head(10)
+Company	TypeName	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	ppi
+0	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8GB	128GB SSD	Intel Iris Plus Graphics 640	1.37kg	71378.6832	226.98
+1	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8GB	128GB Flash Storage	Intel HD Graphics 6000	1.34kg	47895.5232	127.68
+2	HP	Notebook	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8GB	256GB SSD	Intel HD Graphics 620	1.86kg	30636.0000	141.21
+3	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16GB	512GB SSD	AMD Radeon Pro 455	1.83kg	135195.3360	220.53
+4	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8GB	256GB SSD	Intel Iris Plus Graphics 650	1.37kg	96095.8080	226.98
+5	Acer	Notebook	1366x768	AMD A9-Series 9420 3GHz	4GB	500GB HDD	AMD Radeon R5	2.1kg	21312.0000	100.45
+6	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.2GHz	16GB	256GB Flash Storage	Intel Iris Pro Graphics	2.04kg	114017.6016	220.53
+7	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8GB	256GB Flash Storage	Intel HD Graphics 6000	1.34kg	61735.5360	127.68
+8	Asus	Ultrabook	Full HD 1920x1080	Intel Core i7 8550U 1.8GHz	16GB	512GB SSD	Nvidia GeForce MX150	1.3kg	79653.6000	157.35
+9	Acer	Ultrabook	IPS Panel Full HD 1920x1080	Intel Core i5 8250U 1.6GHz	8GB	256GB SSD	Intel UHD Graphics 620	1.6kg	41025.6000	157.35
+df['Ram']=(df['Ram'].str.replace("GB"," ")).astype(int)
+df.head(10)
+Company	TypeName	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	ppi
+0	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8	128GB SSD	Intel Iris Plus Graphics 640	1.37kg	71378.6832	226.98
+1	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8	128GB Flash Storage	Intel HD Graphics 6000	1.34kg	47895.5232	127.68
+2	HP	Notebook	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8	256GB SSD	Intel HD Graphics 620	1.86kg	30636.0000	141.21
+3	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16	512GB SSD	AMD Radeon Pro 455	1.83kg	135195.3360	220.53
+4	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8	256GB SSD	Intel Iris Plus Graphics 650	1.37kg	96095.8080	226.98
+5	Acer	Notebook	1366x768	AMD A9-Series 9420 3GHz	4	500GB HDD	AMD Radeon R5	2.1kg	21312.0000	100.45
+6	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.2GHz	16	256GB Flash Storage	Intel Iris Pro Graphics	2.04kg	114017.6016	220.53
+7	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8	256GB Flash Storage	Intel HD Graphics 6000	1.34kg	61735.5360	127.68
+8	Asus	Ultrabook	Full HD 1920x1080	Intel Core i7 8550U 1.8GHz	16	512GB SSD	Nvidia GeForce MX150	1.3kg	79653.6000	157.35
+9	Acer	Ultrabook	IPS Panel Full HD 1920x1080	Intel Core i5 8250U 1.6GHz	8	256GB SSD	Intel UHD Graphics 620	1.6kg	41025.6000	157.35
+df['Weight']=(df['Weight'].str.replace("kg"," ")).astype(float)
+df.head(10)
+Company	TypeName	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	ppi
+0	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8	128GB SSD	Intel Iris Plus Graphics 640	1.37	71378.6832	226.98
+1	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8	128GB Flash Storage	Intel HD Graphics 6000	1.34	47895.5232	127.68
+2	HP	Notebook	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8	256GB SSD	Intel HD Graphics 620	1.86	30636.0000	141.21
+3	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16	512GB SSD	AMD Radeon Pro 455	1.83	135195.3360	220.53
+4	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8	256GB SSD	Intel Iris Plus Graphics 650	1.37	96095.8080	226.98
+5	Acer	Notebook	1366x768	AMD A9-Series 9420 3GHz	4	500GB HDD	AMD Radeon R5	2.10	21312.0000	100.45
+6	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.2GHz	16	256GB Flash Storage	Intel Iris Pro Graphics	2.04	114017.6016	220.53
+7	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8	256GB Flash Storage	Intel HD Graphics 6000	1.34	61735.5360	127.68
+8	Asus	Ultrabook	Full HD 1920x1080	Intel Core i7 8550U 1.8GHz	16	512GB SSD	Nvidia GeForce MX150	1.30	79653.6000	157.35
+9	Acer	Ultrabook	IPS Panel Full HD 1920x1080	Intel Core i5 8250U 1.6GHz	8	256GB SSD	Intel UHD Graphics 620	1.60	41025.6000	157.35
+df['clock speed (Ghz)']=df['Cpu'].str.split(" ").str.get(-1).str.replace("GHz"," ").astype(float)
+df.head()
+Company	TypeName	ScreenResolution	Cpu	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)
+0	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 2.3GHz	8	128GB SSD	Intel Iris Plus Graphics 640	1.37	71378.6832	226.98	2.3
+1	Apple	Ultrabook	1440x900	Intel Core i5 1.8GHz	8	128GB Flash Storage	Intel HD Graphics 6000	1.34	47895.5232	127.68	1.8
+2	HP	Notebook	Full HD 1920x1080	Intel Core i5 7200U 2.5GHz	8	256GB SSD	Intel HD Graphics 620	1.86	30636.0000	141.21	2.5
+3	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	Intel Core i7 2.7GHz	16	512GB SSD	AMD Radeon Pro 455	1.83	135195.3360	220.53	2.7
+4	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	Intel Core i5 3.1GHz	8	256GB SSD	Intel Iris Plus Graphics 650	1.37	96095.8080	226.98	3.1
+df.corr(numeric_only=True)['Price']
+Price
+Ram	0.740388
+Weight	0.212408
+Price	1.000000
+ppi	0.469564
+clock speed (Ghz)	0.428179
+
+dtype: float64
+compare=df[['clock speed (Ghz)','Price']].groupby('clock speed (Ghz)',as_index=False).mean().sort_values('clock speed (Ghz)')
+compare.set_index('clock speed (Ghz)').plot(kind='bar',color='c')
+plt.ylabel('Avg Price')
+plt.show()
+No description has been provided for this image
+filter1=df['Cpu'].str.split(" ").str.slice(0,-1)
+filter1
+Cpu
+0	[Intel, Core, i5]
+1	[Intel, Core, i5]
+2	[Intel, Core, i5, 7200U]
+3	[Intel, Core, i7]
+4	[Intel, Core, i5]
+...	...
+1269	[Intel, Core, i7, 6500U]
+1270	[Intel, Core, i7, 6500U]
+1271	[Intel, Core, i7, 6500U]
+1272	[Intel, Celeron, Dual, Core, N3050]
+1273	[Intel, Core, i7, 6500U]
+1273 rows × 1 columns
+
+
+dtype: object
+filter2= filter1.apply(lambda x: ' '.join(x))
+filter2
+Cpu
+0	Intel Core i5
+1	Intel Core i5
+2	Intel Core i5 7200U
+3	Intel Core i7
+4	Intel Core i5
+...	...
+1269	Intel Core i7 6500U
+1270	Intel Core i7 6500U
+1271	Intel Core i7 6500U
+1272	Intel Celeron Dual Core N3050
+1273	Intel Core i7 6500U
+1273 rows × 1 columns
+
+
+dtype: object
+for i in filter2:
+    print(i)
+Intel Core i5
+Intel Core i5
+Intel Core i5 7200U
+Intel Core i7
+Intel Core i5
+AMD A9-Series 9420
+Intel Core i7
+Intel Core i5
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i7
+Intel Core i3 6006U
+Intel Core M m3
+Intel Core i5
+Intel Core i7 7500U
+Intel Core i7
+Intel Core i3 7100U
+Intel Core i5 8250U
+Intel Atom x5-Z8350
+Intel Core i5 7300HQ
+AMD E-Series E2-9000e
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i3 6006U
+Intel Core i5
+Intel Core i5 8250U
+Intel Core i7 8650U
+Intel Core i5 8250U
+Intel Atom x5-Z8300
+AMD E-Series E2-6110
+AMD A6-Series 9220
+Intel Core i7 8550U
+Intel Core i5
+Intel Celeron Dual Core N3350
+Intel Core i3 7130U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i5
+Intel Core i3 6006U
+AMD Ryzen 1700
+Intel Core i5 7200U
+Intel Pentium Quad Core N4200
+Intel Atom x5-Z8550
+Intel Core i7 8550U
+AMD A6-Series 9220
+Intel Core i7 8550U
+Intel Core i3 7100U
+Intel Core i7 8550U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i3 7130U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Celeron Dual Core N3060
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i5 7300HQ
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i3 7130U
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i5
+Intel Core i5 8250U
+AMD A6-Series 9220
+AMD A9-Series 9420
+Intel Core i7 7700HQ
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 8550U
+AMD FX 9830P
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i5 7300HQ
+Intel Core i7 7500U
+Intel Core i5 8250U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+AMD E-Series E2-9000e
+Intel Core i5 8250U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 8550U
+Intel Core i7 7560U
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i3 6006U
+Intel Core i7 8550U
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 8550U
+AMD A9-Series 9420
+Intel Celeron Dual Core N3060
+Intel Core i5 8250U
+AMD E-Series 6110
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i7 8550U
+Intel Core i3 7130U
+Intel Core i7 7500U
+Intel Core i7 8550U
+Intel Celeron Dual Core N3350
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i3 7130U
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+AMD A6-Series 9220
+Intel Core i7 8550U
+Intel Core M 6Y75
+Intel Celeron Dual Core N3350
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i5 7500U
+Intel Core i5 8250U
+Intel Core i3 7100U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i3 6006U
+AMD A9-Series 9420
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Celeron Dual Core N3350
+Intel Core i7 7700HQ
+Intel Pentium Quad Core N4200
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i5 7200U
+AMD A6-Series 9220
+Intel Core i3 7100U
+Intel Core i5 8250U
+Intel Core i3 7100U
+Intel Core i3 6006U
+Intel Core i7 6920HQ
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+Intel Core i5 7300HQ
+Intel Core i5 7Y54
+Intel Core i7 8550U
+Intel Core i7 7500U
+Intel Celeron Dual Core N3350
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i7 7820HK
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Xeon E3-1505M V6
+Intel Core i7 7700HQ
+Intel Core i3 7100U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i5 8250U
+Intel Core i5 8250U
+Intel Core i7 6500U
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i3 7100U
+AMD E-Series 9000e
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i3 6006U
+AMD A10-Series A10-9620P
+Intel Core i7 7820HK
+Intel Core i5 7300HQ
+Intel Core i3 6006U
+Intel Core i7 8550U
+Intel Core i7 7500U
+Intel Core i5 7300HQ
+Intel Core i7 7500U
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i7 7820HK
+Intel Core i5 8250U
+Intel Core i5
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+AMD A9-Series 9420
+Intel Core i7 8550U
+Intel Core i3 7130U
+Intel Core i5 8250U
+AMD A6-Series A6-9220
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i7 8550U
+Intel Core i3 6006U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i5
+AMD Ryzen 1700
+Intel Core i7 8550U
+Intel Core i7 6600U
+Intel Core i7 6500U
+Intel Core i7 7500U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i3 6006U
+Intel Core i7 8550U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Celeron Dual Core 3205U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i7 7820HQ
+AMD A10-Series 9600P
+Intel Core i7 7500U
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Pentium Quad Core N4200
+Intel Core i7 7600U
+Intel Core i7 6500U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+AMD A8-Series 7410
+Intel Celeron Dual Core N3350
+Intel Core i5 8250U
+Intel Core i7 8550U
+Intel Celeron Dual Core 3855U
+Intel Core i5 7200U
+Intel Pentium Quad Core N3710
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 8550U
+AMD A12-Series 9720P
+Intel Celeron Dual Core N3350
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 7300U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Celeron Dual Core N3350
+Intel Core i5 8250U
+Intel Celeron Dual Core N3060
+AMD A12-Series 9720P
+Intel Core i3 7100U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+Intel Celeron Dual Core N3060
+Intel Core i7 8650U
+Intel Celeron Dual Core N3350
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i7 6500U
+Intel Core i7 8550U
+Intel Celeron Dual Core N3350
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Core i5 7300U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Pentium Quad Core N3710
+Intel Core i5 8250U
+Intel Core i5 7300HQ
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i7 7500U
+AMD A9-Series 9420
+AMD Ryzen 1700
+AMD A8-Series 7410
+Intel Core i7 8550U
+AMD A9-Series 9420
+Intel Celeron Quad Core N3450
+Intel Celeron Dual Core N3060
+Intel Celeron Dual Core N3350
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i3 7100U
+Intel Core i5 6440HQ
+Intel Core i7 6820HQ
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+AMD A9-Series 9420
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Celeron Dual Core N3350
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 6500U
+Intel Core i7 7600U
+Intel Core i3 6006U
+Intel Celeron Dual Core N3350
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 6500U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i7 6500U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 7700HQ
+Intel Celeron Quad Core N3450
+Intel Core i7 7820HQ
+Intel Core i3 7100U
+Intel Core i7 7820HK
+Intel Core i7 7700HQ
+Intel Core i7 8550U
+Intel Core i7 7600U
+Intel Core i7 7700HQ
+Intel Celeron Dual Core N3350
+Intel Celeron Dual Core N3060
+Intel Core i7 7500U
+Intel Core i3 7130U
+Intel Core i7 7600U
+Intel Core i7 7820HQ
+AMD Ryzen 1600
+Intel Celeron Dual Core N3060
+Intel Core i7 7Y75
+Intel Core i7 7500U
+Intel Core i5 7200U
+AMD A6-Series 9220
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Pentium Quad Core N4200
+Intel Core i7 7700HQ
+Intel Core i5 7440HQ
+Intel Core i5 7200U
+Intel Xeon E3-1505M V6
+Intel Core i5 7300HQ
+Intel Core i7 7660U
+Intel Core i5 7200U
+Intel Core i7 6820HQ
+Intel Core i7 7820HQ
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Pentium Quad Core N3710
+Intel Core i7 7700HQ
+Intel Core M m3-7Y30
+Intel Core i7 7660U
+Intel Core i3 6006U
+Intel Core i3 6006U
+Intel Celeron Dual Core N3060
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7820HQ
+Intel Pentium Quad Core N4200
+Intel Core i3 6006U
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i7 6600U
+Intel Core i7 8550U
+Intel Core i5 7200U
+Intel Core i5 7Y57
+Intel Core i5 8250U
+Intel Core i7 6700HQ
+Intel Core i3 6100U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i3 7100U
+Intel Core i5 8250U
+Intel Atom x5-Z8350
+Intel Core i3 6006U
+Intel Core i5 8250U
+Intel Core i7 6820HQ
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+AMD A10-Series 9620P
+Intel Core i7 6700HQ
+Intel Core i5 6200U
+Intel Core i7 8550U
+Intel Core i7 7600U
+Intel Core i3 7100U
+Intel Core i5 7200U
+Intel Celeron Dual Core N3350
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Celeron Dual Core N3350
+Intel Celeron Dual Core N3060
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 8250U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Celeron Dual Core N3350
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i5 7300U
+Intel Core i3 6006U
+Intel Core i5 8250U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i5 7440HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Celeron Quad Core N3450
+Intel Core i5 7300HQ
+Intel Core i7 7600U
+Intel Core i5 8250U
+Intel Pentium Quad Core N3710
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 8550U
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Core i5 7300HQ
+AMD E-Series 7110
+Intel Core i3 7100U
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Celeron Dual Core N3350
+Intel Atom x5-Z8350
+Intel Core i7 7500U
+AMD A10-Series A10-9620P
+Intel Core i3 6006U
+Intel Celeron Dual Core N3350
+Intel Core i3 7130U
+Intel Core M 6Y75
+Intel Core i7 7700HQ
+Intel Core i5 7300HQ
+Intel Core i5 8250U
+Intel Core i5 7300U
+Intel Core i5 7200U
+Intel Pentium Quad Core N4200
+Intel Core i5 7200U
+Intel Core i5 7440HQ
+Intel Pentium Quad Core N3710
+AMD A9-Series A9-9420
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Atom x5-Z8350
+Intel Core i7 7500U
+Intel Core i7 6820HK
+Intel Core i7 7820HK
+Intel Core i7 7500U
+Intel Celeron Quad Core N3450
+Intel Core i5 7300U
+Intel Core i3 7100U
+Intel Core i7 7600U
+Intel Celeron Dual Core N3060
+Intel Core i7 6820HK
+Intel Core i7 7700HQ
+Intel Core i7 6600U
+Intel Core i7 8550U
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+AMD A12-Series 9720P
+Intel Core M 7Y30
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i3 6100U
+Intel Core i7 7500U
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i3 7100U
+Intel Celeron Quad Core N3450
+Intel Core i7 6820HK
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i7 6500U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Pentium Quad Core N3710
+Intel Xeon E3-1535M v6
+Intel Core i7 6700HQ
+Intel Core i3 6006U
+Intel Core i3 6006U
+Intel Core i5 7300U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Celeron Quad Core N3160
+Intel Core i5 7300U
+Intel Core i5 6200U
+Intel Core i5 8250U
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Atom x5-Z8350
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i3 6006U
+Intel Celeron Dual Core N3350
+Intel Core i5 7300HQ
+Intel Core i5 8250U
+Intel Celeron Dual Core N3060
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+AMD A9-Series 9420
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Celeron Dual Core N3060
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i7 6820HK
+Intel Core i5 7300HQ
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 8550U
+Intel Core i7 8550U
+Intel Core i7 6700HQ
+Intel Core i7 7700HQ
+Intel Core i5 6300U
+Intel Celeron Dual Core N3350
+Intel Core i5 6200U
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i3 6100U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i7 7600U
+Intel Core i5 7200U
+Intel Core i5 7200U
+AMD E-Series E2-9000
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Celeron Dual Core N3350
+Intel Core i7 8550U
+Intel Core i5 7300HQ
+Intel Core i5 7300HQ
+Intel Celeron Dual Core N3350
+Intel Core i5 7300HQ
+Intel Core i3 6006U
+Intel Core i7 8550U
+Intel Core i7 7820HK
+Intel Core i5 7200U
+Intel Core i3 6006U
+AMD A10-Series 9600P
+Intel Celeron Dual Core 3855U
+Intel Celeron Dual Core 3855U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Celeron Dual Core N3050
+Intel Core i7 7500U
+Intel Core M M3-6Y30
+Intel Core i7 6500U
+Intel Core i7 7500U
+Intel Core i5 7300HQ
+AMD A9-Series 9420
+AMD A12-Series 9720P
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i7 6500U
+Intel Core i5 6300HQ
+AMD A10-Series 9620P
+Intel Core i7 7700HQ
+Intel Core i5 7440HQ
+Intel Core i5 7200U
+Intel Celeron Dual Core N3350
+Intel Core i5 7300U
+Intel Core i5 7200U
+Intel Core i5 7300U
+AMD A6-Series 7310
+Intel Atom Z8350
+Intel Core i7 7500U
+Intel Core i7 6500U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 8250U
+Intel Core i3 7100U
+Intel Core i5 7200U
+AMD A9-Series 9420
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+AMD A9-Series A9-9420
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7600U
+Intel Celeron Dual Core N3060
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Xeon E3-1535M v5
+Intel Celeron Dual Core N3060
+Intel Core i5 6300U
+Intel Core i5 6300HQ
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i5 6260U
+Intel Core i5 7300HQ
+Intel Core i7 6700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7600U
+Intel Core i5 7Y57
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i5 6200U
+Intel Pentium Quad Core N4200
+Intel Core i7 6700HQ
+Intel Core i7 7500U
+Intel Pentium Quad Core N4200
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i5 6200U
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i7 6820HQ
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Pentium Dual Core N4200
+Intel Core i7 7700HQ
+Intel Core i7 6700HQ
+Intel Core i7 6600U
+Intel Celeron Quad Core N3710
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i5 7300HQ
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7300HQ
+Intel Core i7 7700HQ
+Intel Celeron Dual Core N3350
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core M
+Intel Core i5 7200U
+Intel Celeron Dual Core N3350
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7300HQ
+Intel Pentium Quad Core N4200
+Intel Core i5 7300U
+Intel Core i5 6200U
+AMD A12-Series 9700P
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Celeron Dual Core N3060
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Pentium Dual Core 4405U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Celeron Dual Core N3060
+Intel Core i3 7100U
+Intel Core i7 7820HK
+Intel Core i7 6600U
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i5 7300U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i3 7100U
+Intel Celeron Quad Core N3160
+Intel Core i5 7200U
+Intel Core i7 6700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 6500U
+Intel Core i7 7500U
+Intel Celeron Dual Core N3350
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i7 6500U
+Intel Celeron Dual Core N3060
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Pentium Quad Core N4200
+Intel Core i7 7600U
+Intel Core i5 6200U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i5 7300U
+Intel Core i5 7200U
+Intel Core i5 7300HQ
+Intel Core i7 7660U
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Core i3 7100U
+Intel Core i7 7500U
+Intel Core i7 7600U
+Intel Pentium Quad Core N4200
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Celeron Dual Core N3350
+Intel Core i7 6500U
+Intel Pentium Quad Core N3710
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i5 7300HQ
+Intel Celeron Dual Core N3060
+AMD A4-Series 7210
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Core i5 7300U
+Intel Core i7 7Y75
+Intel Core i7 6820HK
+Intel Core i7 7Y75
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Celeron Dual Core 3205U
+Intel Core i5 6300HQ
+Intel Core i7 7500U
+Intel Core i5 7440HQ
+Intel Core M 6Y75
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i3 7100U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7700HQ
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Core i7 6500U
+Intel Core i7 7500U
+Intel Core i7 6600U
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Pentium Quad Core N4200
+Intel Core i5 6200U
+Intel Celeron Dual Core N3060
+Intel Core i7 6560U
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 6820HK
+Intel Core i5 6300HQ
+Intel Pentium Quad Core N3710
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core M m7-6Y75
+AMD FX 8800P
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i3 6006U
+Intel Celeron Dual Core N3060
+Intel Core i7 6820HQ
+Intel Core i7 7600U
+Intel Core i5 6200U
+Intel Core M M7-6Y75
+Intel Core i7 6600U
+Intel Core i7 7700HQ
+Intel Core i5 7Y54
+Intel Pentium Quad Core N4200
+Intel Core i7 6500U
+Intel Celeron Dual Core N3060
+Intel Core i5 6300U
+Intel Core i5 7300U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 7Y75
+Intel Core i7 6600U
+Intel Core i7 6700HQ
+Intel Core i5 6200U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i5 6200U
+AMD A12-Series 9720P
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core M 6Y75
+Intel Core i3 6006U
+Intel Celeron Dual Core N3350
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Pentium Quad Core N4200
+Intel Core i7 7700HQ
+Intel Core i7 7500U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i3 7100U
+Intel Core i5 7200U
+Intel Core i5 6300U
+Intel Core i5 7200U
+Intel Core i7 6600U
+Intel Core i5 7200U
+Intel Core i3 7100U
+Intel Core i5 7300HQ
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 6500U
+Intel Core i3 7100U
+Intel Core i5 6200U
+Intel Core i3 7100U
+Intel Core i7 6820HQ
+Intel Core i5 6200U
+Intel Core i7 6500U
+Intel Core i3 6100U
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i5 6300U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+AMD A9-Series 9420
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i7 6500U
+Intel Core i7 6500U
+Intel Core i5 7200U
+Intel Core i7 6600U
+Intel Core i5 6300U
+Intel Core i5 7200U
+Intel Core i7 6500U
+Intel Atom X5-Z8350
+Intel Core i7 6500U
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i5 6300U
+Intel Core i5 6200U
+Intel Core i7 6820HK
+Intel Core i7 6700HQ
+Intel Celeron Dual Core N3060
+Intel Core i7 6600U
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i3 6100U
+Intel Core i5 7200U
+AMD A8-Series 7410
+Intel Core i7 7500U
+Intel Core i7 6700HQ
+Intel Core i7 7500U
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+Intel Core i7 7500U
+Intel Core i7 6700HQ
+Intel Core i7 7500U
+Intel Core i7 6820HK
+Intel Core i7 6500U
+Intel Core i7 6700HQ
+Intel Core M
+Intel Core i3 6100U
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i7 6500U
+Intel Core i5 6200U
+Intel Core i5 6300HQ
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core M 6Y75
+Intel Core i7 6820HK
+Intel Atom x5-Z8550
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i5 6200U
+Intel Core i7 6500U
+Intel Core i5 6200U
+Intel Pentium Dual Core 4405Y
+AMD A8-Series 7410
+Intel Pentium Quad Core N3700
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core i5 8250U
+Intel Core i5 6200U
+Intel Core i5 7200U
+Intel Core i5 7200U
+Intel Core i7 6700HQ
+Intel Pentium Quad Core N3710
+Intel Core i7 6700HQ
+Intel Core i3 6100U
+Intel Core i3 6100U
+Intel Celeron Dual Core 3205U
+Intel Core i7 6700HQ
+Intel Core i7 7700HQ
+Intel Core i5 6200U
+Intel Core i7 6700HQ
+Intel Core i5 6200U
+AMD A6-Series 9220
+Intel Core i7 6700HQ
+Intel Core M 6Y54
+Intel Core i5 6200U
+Intel Core i3 6006U
+Intel Core i7 6500U
+Intel Atom x5-Z8550
+Intel Core i7 7560U
+Intel Core i7 6820HK
+Intel Core i7 6500U
+Intel Core i7 7500U
+Intel Core i7 6700HQ
+Intel Atom X5-Z8350
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i5 6200U
+Intel Core i3 7100U
+Intel Core i7 6500U
+Intel Atom x5-Z8550
+Intel Core i5 6300U
+Intel Core i5 7300HQ
+Intel Core i5 6300HQ
+Intel Core i7 7500U
+Intel Core i7 6600U
+Intel Celeron Dual Core N3350
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 6500U
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+Intel Core i7 6820HQ
+Intel Core i7 6500U
+Intel Core i7 6600U
+Intel Core i7 7700HQ
+Intel Core i5 6300U
+Intel Core i7 6700HQ
+Intel Core i7 6600U
+Intel Core i7 6700HQ
+Intel Core i7 6500U
+Intel Core i7 7500U
+Intel Core i5 6200U
+Intel Core i7 6500U
+Intel Core i3 6006U
+AMD E-Series 7110
+Intel Core i5 6200U
+Intel Core i7 7700HQ
+Intel Core i5 6300HQ
+AMD A6-Series A6-9220
+Intel Core i7 7700HQ
+Intel Core i7 6600U
+Intel Core i5 6200U
+Intel Core i7 6600U
+Intel Core i7 6600U
+Intel Core i7 6700HQ
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i5 6200U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i3 6006U
+Intel Celeron Dual Core N3060
+Intel Core i7 7500U
+Intel Core i7 6500U
+Intel Core i7 8550U
+Intel Celeron Dual Core N3050
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i3 7100U
+Intel Core i7 6500U
+Intel Core i7 6700HQ
+Intel Core i7 6700HQ
+Intel Core i3 6100U
+Intel Core i5 6200U
+Intel Core i7 7500U
+Intel Core i7 7500U
+Intel Celeron Dual Core N3350
+Intel Core i7 6700HQ
+Intel Core i7 6700HQ
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i5 6300U
+Intel Core i7 7700HQ
+Intel Core i5 7300HQ
+Samsung Cortex A72&A53
+Intel Core i5 7200U
+Intel Core M
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 6700HQ
+Intel Celeron Dual Core N3350
+Intel Core i7 7700HQ
+Intel Core i3 6006U
+Intel Core i7 6500U
+Intel Core i7 8550U
+Intel Core i7 7500U
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+Intel Core i5 7200U
+AMD E-Series 9000
+Intel Core i3 6006U
+Intel Core i7 7700HQ
+Intel Core M
+Intel Core i7 7700HQ
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+Intel Core i7 7700HQ
+Intel Celeron Dual Core 3205U
+Intel Core i3 6006U
+Intel Core i5 7200U
+Intel Core i7 6700HQ
+Intel Core i7 7Y75
+Intel Core i7 6600U
+Intel Core i7 6700HQ
+AMD A12-Series 9720P
+Intel Core i5 6300U
+Intel Core i3 7100U
+Intel Pentium Quad Core N3710
+Intel Core i7 7500U
+Intel Core i5 7200U
+Intel Core i7 6700HQ
+Intel Core i7 7700HQ
+Intel Core i7 6500U
+Intel Core i7 7700HQ
+Intel Core i3 7100U
+Intel Core i7 7700HQ
+Intel Core i5
+Intel Core i3 6006U
+Intel Core i7 6500U
+Intel Core i5 6200U
+Intel Core i7 6700HQ
+Intel Core i7 7500U
+AMD A12-Series 9720P
+Intel Core i7 6500U
+Intel Core i3 6006U
+Intel Core i7 7500U
+Intel Core i5 6200U
+Intel Core i7 7700HQ
+Intel Core i5 7200U
+Intel Core i7 6700HQ
+Intel Core i5 7200U
+Intel Core i5 7Y54
+Intel Pentium Quad Core N3710
+AMD A6-Series 9220
+Intel Core i3 6100U
+Intel Core i5 6200U
+Intel Pentium Quad Core N3700
+Intel Celeron Dual Core N3350
+Intel Core i7 6700HQ
+Intel Core i3 6006U
+Intel Core i7 6500U
+Intel Core i7 6700HQ
+Intel Core i5 6200U
+Intel Core M 6Y30
+Intel Core i3 7100U
+Intel Celeron Dual Core N3060
+Intel Celeron Dual Core N3050
+Intel Core i7 6700HQ
+AMD A9-Series 9410
+Intel Core i7 7500U
+Intel Celeron Dual Core N3060
+Intel Core i7 6500U
+Intel Core i7 6500U
+Intel Core i7 6500U
+Intel Celeron Dual Core N3050
+Intel Core i7 6500U
+processor_list=filter2.tolist()
+def correct_processor_list(processor_list):
+    updated_list = []
+    for processor in processor_list:
+        if processor.startswith("Intel Core") and not processor.startswith("Intel Core M"):
+            updated_list.append(" ".join(processor.split(" ")[0:3]))
+        elif processor.startswith("Intel") or processor == "Intel Core M":
+            updated_list.append("Other Intel processors")
+        elif processor.startswith("AMD"):
+            updated_list.append("AMD processor")
+        else:
+            updated_list.append(processor)
+    return updated_list
+
+corrected_list = correct_processor_list(processor_list)
+df['processor']=corrected_list
+df.drop('Cpu',axis=1,inplace=True)
+df.head()
+Company	TypeName	ScreenResolution	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor
+0	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	8	128GB SSD	Intel Iris Plus Graphics 640	1.37	71378.6832	226.98	2.3	Intel Core i5
+1	Apple	Ultrabook	1440x900	8	128GB Flash Storage	Intel HD Graphics 6000	1.34	47895.5232	127.68	1.8	Intel Core i5
+2	HP	Notebook	Full HD 1920x1080	8	256GB SSD	Intel HD Graphics 620	1.86	30636.0000	141.21	2.5	Intel Core i5
+3	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	16	512GB SSD	AMD Radeon Pro 455	1.83	135195.3360	220.53	2.7	Intel Core i7
+4	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	8	256GB SSD	Intel Iris Plus Graphics 650	1.37	96095.8080	226.98	3.1	Intel Core i5
+df=df[df['processor']!='Samsung Cortex A72&A53']
+df['processor'].value_counts()
+count
+processor	
+Intel Core i7	515
+Intel Core i5	422
+Other Intel processors	141
+Intel Core i3	134
+AMD processor	60
+
+dtype: int64
+print(df['processor'].value_counts())
+df['processor'].value_counts().plot(kind='bar')
+plt.show()
+processor
+Intel Core i7             515
+Intel Core i5             422
+Other Intel processors    141
+Intel Core i3             134
+AMD processor              60
+Name: count, dtype: int64
+No description has been provided for this image
+compare=df[['processor','Price']].groupby('processor', as_index = False).mean().sort_values('Price',ascending=False)
+print(compare)
+compare.set_index('processor').plot(kind='bar',color='y')
+plt.show()
+                processor         Price
+3           Intel Core i7  85902.151149
+2           Intel Core i5  54057.288284
+4  Other Intel processors  30222.369600
+0           AMD processor  29889.751440
+1           Intel Core i3  28923.537063
+No description has been provided for this image
+df.head(5)
+Company	TypeName	ScreenResolution	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor
+0	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	8	128GB SSD	Intel Iris Plus Graphics 640	1.37	71378.6832	226.98	2.3	Intel Core i5
+1	Apple	Ultrabook	1440x900	8	128GB Flash Storage	Intel HD Graphics 6000	1.34	47895.5232	127.68	1.8	Intel Core i5
+2	HP	Notebook	Full HD 1920x1080	8	256GB SSD	Intel HD Graphics 620	1.86	30636.0000	141.21	2.5	Intel Core i5
+3	Apple	Ultrabook	IPS Panel Retina Display 2880x1800	16	512GB SSD	AMD Radeon Pro 455	1.83	135195.3360	220.53	2.7	Intel Core i7
+4	Apple	Ultrabook	IPS Panel Retina Display 2560x1600	8	256GB SSD	Intel Iris Plus Graphics 650	1.37	96095.8080	226.98	3.1	Intel Core i5
+gpu_list=df['Gpu'].to_list()
+def correct_processor_list(gpu_list):
+    updated__list = []
+    for gpu in gpu_list:
+        if gpu.startswith("Intel"):
+            updated__list.append("Intel GPU")
+        elif gpu.startswith("AMD"):
+            updated__list.append("AMD GPU")
+        elif gpu.startswith("Nvidia"):
+            updated__list.append("Nvidia GPU")
+        else:
+            updated__list.append(gpu)
+    return updated__list
+
+corrected_gpu_list = correct_processor_list(gpu_list)
+df['Gpu'][:]=corrected_gpu_list
+df.sample(10)
+Company	TypeName	ScreenResolution	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor
+1124	Asus	Notebook	1366x768	4	1TB HDD	Intel GPU	2.00	23176.8000	100.45	2.4	Intel Core i3
+1210	Apple	Ultrabook	IPS Panel Retina Display 2304x1440	8	512GB Flash Storage	Intel GPU	0.92	68145.1200	226.42	1.2	Other Intel processors
+1119	Asus	Gaming	Full HD 1920x1080	8	128GB SSD + 1TB HDD	Nvidia GPU	3.52	69929.4672	127.34	2.6	Intel Core i7
+1040	Lenovo	2 in 1 Convertible	IPS Panel Full HD / Touchscreen 1920x1080	4	256GB SSD	Intel GPU	1.80	45128.1600	141.21	2.5	Intel Core i7
+640	Lenovo	Gaming	IPS Panel Full HD 1920x1080	8	128GB SSD + 1TB HDD	Nvidia GPU	2.50	59087.5200	141.21	2.8	Intel Core i7
+731	Dell	Notebook	1366x768	12	1TB HDD	Intel GPU	2.25	34578.7200	100.45	2.5	Intel Core i5
+1251	HP	Notebook	1366x768	4	500GB HDD	AMD GPU	1.86	21258.7200	100.45	2.5	AMD processor
+835	Dell	Gaming	Full HD 1920x1080	16	256GB SSD + 1TB HDD	Nvidia GPU	3.21	147832.2864	141.21	2.8	Intel Core i7
+1083	HP	Ultrabook	IPS Panel 4K Ultra HD 3840x2160	16	512GB SSD	Intel GPU	1.30	109170.7200	331.26	2.7	Intel Core i7
+220	Dell	Notebook	Full HD 1920x1080	8	256GB SSD	AMD GPU	2.20	36089.2080	141.21	1.6	Intel Core i5
+ 
+print(df['Gpu'].value_counts())
+df['Gpu'].value_counts().plot(kind='pie',autopct='%.1f%%',shadow=True, startangle=0)
+plt.axis('equal')
+plt.show()
+Gpu
+Intel GPU     702
+Nvidia GPU    396
+AMD GPU       174
+Name: count, dtype: int64
+No description has been provided for this image
+sns.barplot(x=df['Gpu'],y=df['Price'])
+plt.show()
+No description has been provided for this image
+df['Touchscreen']=df['ScreenResolution'].apply(lambda x: 1 if "Touchscreen" in x else 0)
+df.tail(5)
+Company	TypeName	ScreenResolution	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen
+1269	Asus	Notebook	1366x768	4	500GB HDD	Nvidia GPU	2.20	38378.6496	100.45	2.5	Intel Core i7	0
+1270	Lenovo	2 in 1 Convertible	IPS Panel Full HD / Touchscreen 1920x1080	4	128GB SSD	Intel GPU	1.80	33992.6400	157.35	2.5	Intel Core i7	1
+1271	Lenovo	2 in 1 Convertible	IPS Panel Quad HD+ / Touchscreen 3200x1800	16	512GB SSD	Intel GPU	1.30	79866.7200	276.05	2.5	Intel Core i7	1
+1272	Lenovo	Notebook	1366x768	2	64GB Flash Storage	Intel GPU	1.50	12201.1200	111.94	1.6	Other Intel processors	0
+1273	HP	Notebook	1366x768	6	1TB HDD	AMD GPU	2.19	40705.9200	100.45	2.5	Intel Core i7	0
+df['IPS Display']=df['ScreenResolution'].apply(lambda x: 1 if "IPS" in x else 0)
+df.drop('ScreenResolution',axis=1,inplace=True)
+df.tail(5)
+Company	TypeName	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display
+1269	Asus	Notebook	4	500GB HDD	Nvidia GPU	2.20	38378.6496	100.45	2.5	Intel Core i7	0	0
+1270	Lenovo	2 in 1 Convertible	4	128GB SSD	Intel GPU	1.80	33992.6400	157.35	2.5	Intel Core i7	1	1
+1271	Lenovo	2 in 1 Convertible	16	512GB SSD	Intel GPU	1.30	79866.7200	276.05	2.5	Intel Core i7	1	1
+1272	Lenovo	Notebook	2	64GB Flash Storage	Intel GPU	1.50	12201.1200	111.94	1.6	Other Intel processors	0	0
+1273	HP	Notebook	6	1TB HDD	AMD GPU	2.19	40705.9200	100.45	2.5	Intel Core i7	0	0
+graph=df['Touchscreen'].value_counts()
+graph.index=['Touch screen available','Touch screen not available']
+print(graph)
+clr=['#9900CC','#FF99CC']
+graph.plot(kind='bar',color=clr)
+plt.xlabel('Touch or Non Touch Screen')
+plt.ylabel('Quantity')
+plt.show()
+Touch screen available        1085
+Touch screen not available     187
+Name: count, dtype: int64
+No description has been provided for this image
+sns.barplot(x=df['Touchscreen'],y=df['Price'])
+plt.show()
+No description has been provided for this image
+graph=df['IPS Display'].value_counts()
+graph.index=['IPS available','IPS not available']
+print(graph)
+clr=['k','m']
+graph.plot(kind='bar',color=clr)
+plt.xlabel('Touch or Non Touch Screen')
+plt.ylabel('Quantity')
+plt.show()
+IPS available        916
+IPS not available    356
+Name: count, dtype: int64
+No description has been provided for this image
+sns.barplot(x=df['IPS Display'],y=df['Price'])
+plt.show()
+No description has been provided for this image
+df.head(5)
+Company	TypeName	Ram	Memory	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display
+0	Apple	Ultrabook	8	128GB SSD	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1
+1	Apple	Ultrabook	8	128GB Flash Storage	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0
+2	HP	Notebook	8	256GB SSD	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0
+3	Apple	Ultrabook	16	512GB SSD	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1
+4	Apple	Ultrabook	8	256GB SSD	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1
+df['TypeName'].value_counts()
+count
+TypeName	
+Notebook	705
+Gaming	205
+Ultrabook	194
+2 in 1 Convertible	116
+Workstation	29
+Netbook	23
+
+dtype: int64
+print(df[['TypeName','Price']].groupby('TypeName').mean().sort_values('Price',ascending=False))
+df[['TypeName','Price']].groupby('TypeName').mean().sort_values('Price',ascending=False).plot(kind='bar')
+plt.show()
+                            Price
+TypeName                         
+Workstation         121497.525683
+Gaming               92247.960187
+Ultrabook            82939.698928
+2 in 1 Convertible   69005.683862
+Notebook             42025.341386
+Netbook              35877.825391
+No description has been provided for this image
+stor = df.iloc[:, 3:4]
+stor
+Memory
+0	128GB SSD
+1	128GB Flash Storage
+2	256GB SSD
+3	512GB SSD
+4	256GB SSD
+...	...
+1269	500GB HDD
+1270	128GB SSD
+1271	512GB SSD
+1272	64GB Flash Storage
+1273	1TB HDD
+1272 rows × 1 columns
+
+stor[['SSD','HDD','FLASH Storage','Hybrid']]=0
+stor
+Memory	SSD	HDD	FLASH Storage	Hybrid
+0	128GB SSD	0	0	0	0
+1	128GB Flash Storage	0	0	0	0
+2	256GB SSD	0	0	0	0
+3	512GB SSD	0	0	0	0
+4	256GB SSD	0	0	0	0
+...	...	...	...	...	...
+1269	500GB HDD	0	0	0	0
+1270	128GB SSD	0	0	0	0
+1271	512GB SSD	0	0	0	0
+1272	64GB Flash Storage	0	0	0	0
+1273	1TB HDD	0	0	0	0
+1272 rows × 5 columns
+
+stor["Memory"].value_counts()
+count
+Memory	
+256GB SSD	412
+1TB HDD	215
+500GB HDD	123
+512GB SSD	114
+128GB SSD + 1TB HDD	94
+128GB SSD	73
+256GB SSD + 1TB HDD	73
+32GB Flash Storage	35
+2TB HDD	16
+512GB SSD + 1TB HDD	14
+1TB SSD	14
+64GB Flash Storage	13
+256GB SSD + 2TB HDD	10
+256GB Flash Storage	8
+16GB Flash Storage	7
+1.0TB Hybrid	7
+32GB SSD	6
+180GB SSD	5
+128GB Flash Storage	4
+512GB SSD + 2TB HDD	3
+16GB SSD	3
+512GB Flash Storage	2
+1TB SSD + 1TB HDD	2
+256GB SSD + 500GB HDD	2
+128GB SSD + 2TB HDD	2
+256GB SSD + 256GB SSD	2
+512GB SSD + 256GB SSD	1
+512GB SSD + 512GB SSD	1
+64GB Flash Storage + 1TB HDD	1
+1TB HDD + 1TB HDD	1
+32GB HDD	1
+64GB SSD	1
+128GB HDD	1
+240GB SSD	1
+8GB SSD	1
+508GB Hybrid	1
+1.0TB HDD	1
+512GB SSD + 1.0TB Hybrid	1
+256GB SSD + 1.0TB Hybrid	1
+
+dtype: int64
+corrections={
+    "256GB SSD +  256GB SSD":"512GB SSD",
+    "512GB SSD +  256GB SSD":"768GB SSD",
+    "512GB SSD +  512GB SSD":"1024GB SSD",
+    "1TB HDD +  1TB HDD":"2TB HDD",
+    "512GB SSD +  1.0TB Hybrid":"512GB SSD +  1TB Hybrid",
+    "256GB SSD +  1.0TB Hybrid":"256GB SSD +  1TB Hybrid",
+    "1.0TB Hybrid":"1TB Hybrid",
+    "1.0TB HDD":"1TB HDD"
+}
+df['Memory'].replace(corrections,inplace=True)
+df["Memory"].value_counts()
+count
+Memory	
+256GB SSD	412
+1TB HDD	216
+500GB HDD	123
+512GB SSD	116
+128GB SSD + 1TB HDD	94
+128GB SSD	73
+256GB SSD + 1TB HDD	73
+32GB Flash Storage	35
+2TB HDD	17
+1TB SSD	14
+512GB SSD + 1TB HDD	14
+64GB Flash Storage	13
+256GB SSD + 2TB HDD	10
+256GB Flash Storage	8
+1TB Hybrid	7
+16GB Flash Storage	7
+32GB SSD	6
+180GB SSD	5
+128GB Flash Storage	4
+512GB SSD + 2TB HDD	3
+16GB SSD	3
+512GB Flash Storage	2
+1TB SSD + 1TB HDD	2
+256GB SSD + 500GB HDD	2
+128GB SSD + 2TB HDD	2
+768GB SSD	1
+64GB Flash Storage + 1TB HDD	1
+1024GB SSD	1
+32GB HDD	1
+64GB SSD	1
+128GB HDD	1
+240GB SSD	1
+8GB SSD	1
+508GB Hybrid	1
+512GB SSD + 1TB Hybrid	1
+256GB SSD + 1TB Hybrid	1
+
+dtype: int64
+stor['Memory']=df["Memory"]
+stor.isna().sum()
+0
+Memory	0
+SSD	0
+HDD	0
+FLASH Storage	0
+Hybrid	0
+
+dtype: int64
+stor.sample(10)
+Memory	SSD	HDD	FLASH Storage	Hybrid
+253	512GB SSD	0	0	0	0
+500	64GB Flash Storage	0	0	0	0
+791	32GB Flash Storage	0	0	0	0
+187	256GB SSD	0	0	0	0
+582	128GB SSD	0	0	0	0
+996	256GB SSD	0	0	0	0
+1201	500GB HDD	0	0	0	0
+317	16GB Flash Storage	0	0	0	0
+1016	256GB SSD	0	0	0	0
+410	512GB SSD	0	0	0	0
+k=df['Memory']
+index_ = 0
+
+def divide_(x, stor):
+    global index_
+    if len(x.split(" ")) == 2:
+        parts = x.split(" ")
+        if parts[-1].strip() == 'HDD':
+            stor.at[index_, 'HDD'] = parts[0]
+            index_ = index_ + 1
+
+        elif parts[-1] == 'SSD':
+            stor.at[index_, 'SSD'] = parts[0]
+            index_ = index_ + 1
+
+        elif parts[-1] == 'Hybrid':
+            stor.at[index_, 'Hybrid'] = parts[0]
+            index_ = index_ + 1
+
+    elif len(x.split(" ")) == 3:
+        parts = x.split(" ")
+        if parts[-1] == 'Storage':
+            stor.at[index_, 'FLASH Storage'] = parts[0]
+            index_ = index_ + 1
+
+
+    elif len(x.split(" ")) == 5:
+        parts = x.split(" ")
+        if parts[1] == 'SSD' and parts[-1] == 'HDD':
+            stor.at[index_, 'SSD'] = parts[0]
+            stor.at[index_, 'HDD'] = parts[-2]
+            index_ = index_ + 1
+
+    elif len(x.split(" ")) == 6:
+        parts = x.split(" ")
+        if parts[1] == 'SSD' and parts[-1] == 'Hybrid':
+            stor.at[index_, 'SSD'] = parts[0]
+            stor.at[index_, 'Hybrid'] = parts[-2]
+            index_ = index_ + 1
+
+        elif parts[1] == 'SSD' and parts[-1] == 'HDD':
+            stor.at[index_, 'SSD'] = parts[0]
+            stor.at[index_, 'HDD'] = parts[-2]
+            index_ = index_ + 1
+
+    elif len(x.split(" ")) == 7:
+        parts = x.split(" ")
+        if parts[1] == 'Flash' and parts[-1] == 'HDD':
+            stor.at[index_, 'FLASH Storage'] = parts[0]
+            stor.at[index_, 'HDD'] = parts[-2]
+            index_ = index_ + 1
+
+
+
+    return 0
+
+# Apply divide_ using apply()
+temp = k.apply(lambda element: divide_(element, stor))
+empty_columns_df = stor[(stor['SSD'] == 0) & (stor['FLASH Storage'] == 0) & (stor['Hybrid'] == 0) & (stor['HDD'] == 0) ]
+empty_columns_df
+Memory	SSD	HDD	FLASH Storage	Hybrid
+1272	64GB Flash Storage	0	0	0	0
+1273	1TB HDD	0	0	0	0
+stor.isna().sum()
+stor.dropna(inplace=True)
+stor.isna().sum()
+0
+Memory	0
+SSD	0
+HDD	0
+FLASH Storage	0
+Hybrid	0
+
+dtype: int64
+stor.drop(labels=1273,inplace=True)
+stor[(stor['SSD'] == 0) & (stor['FLASH Storage'] == 0) & (stor['Hybrid'] == 0) & (stor['HDD'] == 0) ]
+Memory	SSD	HDD	FLASH Storage	Hybrid
+1272	64GB Flash Storage	0	0	0	0
+stor.drop("Memory",axis=1,inplace=True)
+stor
+SSD	HDD	FLASH Storage	Hybrid
+0	128GB	0	0	0
+1	0	0	128GB	0
+2	256GB	0	0	0
+3	512GB	0	0	0
+4	256GB	0	0	0
+...	...	...	...	...
+1268	128GB	0	0	0
+1269	512GB	0	0	0
+1270	0	0	64GB	0
+1271	0	1TB	0	0
+1272	0	0	0	0
+1271 rows × 4 columns
+
+df = pd.concat([df, stor], axis=1)
+df.drop(['Memory'],axis=1,inplace=True)
+df.sample(15)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD	FLASH Storage	Hybrid
+1249	Dell	2 in 1 Convertible	8	Intel GPU	1.24	96596.6400	276.05	1.2	Intel Core i5	1	0	0	500GB	0	0
+141	Lenovo	Notebook	8	AMD GPU	1.75	59461.5456	157.35	1.6	Intel Core i5	0	1	256GB	0	0	0
+1070	Dell	Notebook	4	Intel GPU	2.06	25679.8944	100.45	2.3	Intel Core i3	0	0	0	500GB	0	0
+909	LG	Ultrabook	8	Intel GPU	0.98	101178.7200	157.35	2.7	Intel Core i7	1	1	512GB	0	0	0
+582	HP	Notebook	4	Intel GPU	1.49	38308.3200	165.63	2.4	Intel Core i3	0	0	128GB	0	0	0
+506	Asus	Notebook	8	Intel GPU	2.00	65214.7200	141.21	2.7	Intel Core i7	0	0	256GB	1TB	0	0
+1229	MSI	Gaming	8	Nvidia GPU	2.20	61218.7200	141.21	2.8	Intel Core i7	0	0	1TB	0	0	0
+1177	Lenovo	Gaming	16	Nvidia GPU	3.31	69530.4000	141.21	2.6	Intel Core i7	0	1	128GB	1TB	0	0
+1165	Dell	Gaming	8	Nvidia GPU	2.62	79813.4400	282.42	2.8	Intel Core i7	0	0	256GB	0	0	0
+68	Lenovo	Notebook	4	Intel GPU	1.90	29250.7200	141.21	2.5	Intel Core i5	0	0	0	1TB	0	0
+744	Lenovo	Workstation	16	Nvidia GPU	2.50	175770.7200	282.42	2.8	Intel Core i7	0	1	1TB	0	0	0
+1054	Dell	Ultrabook	16	Intel GPU	1.20	120093.1200	276.05	2.7	Intel Core i7	1	0	0	500GB	0	0
+279	Lenovo	Notebook	8	Nvidia GPU	2.80	45234.7200	127.34	1.8	Intel Core i7	0	0	0	2TB	0	0
+586	HP	Gaming	16	Nvidia GPU	3.78	79813.4400	127.34	2.8	Intel Core i7	0	1	256GB	1TB	0	0
+632	Lenovo	Notebook	4	Intel GPU	1.80	44169.1200	141.21	1.6	Intel Core i5	0	0	256GB	0	0	0
+df.head()
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD	FLASH Storage	Hybrid
+0	Apple	Ultrabook	8	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1	128GB	0	0	0
+1	Apple	Ultrabook	8	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0	0	0	128GB	0
+2	HP	Notebook	8	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0	256GB	0	0	0
+3	Apple	Ultrabook	16	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1	512GB	0	0	0
+4	Apple	Ultrabook	8	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1	256GB	0	0	0
+df['SSD'].replace('1TB','1000GB',inplace=True)
+df['SSD']=df['SSD'].str.replace("GB"," ").astype(float)
+df['SSD'].head(5)
+SSD
+0	128.0
+1	NaN
+2	256.0
+3	512.0
+4	256.0
+
+dtype: float64
+corr_={
+    '1TB':'1000GB',
+    '2TB':'2000GB'
+}
+
+df['HDD'].replace(corr_,inplace=True)
+df['HDD'].value_counts()
+count
+HDD	
+0	712
+1000GB	400
+500GB	125
+2000GB	32
+32GB	1
+128GB	1
+
+dtype: int64
+df['HDD']=df['HDD'].str.replace("GB"," ").astype(float)
+df.head(5)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD	FLASH Storage	Hybrid
+0	Apple	Ultrabook	8	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1	128.0	NaN	0	0
+1	Apple	Ultrabook	8	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0	NaN	NaN	128GB	0
+2	HP	Notebook	8	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0	256.0	NaN	0	0
+3	Apple	Ultrabook	16	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1	512.0	NaN	0	0
+4	Apple	Ultrabook	8	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1	256.0	NaN	0	0
+df['FLASH Storage'].value_counts()
+count
+FLASH Storage	
+0	1202
+32GB	35
+64GB	14
+256GB	7
+16GB	7
+128GB	4
+512GB	2
+
+dtype: int64
+df['FLASH Storage']=df['FLASH Storage'].str.replace("GB"," ").astype(float)
+df.head(5)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD	FLASH Storage	Hybrid
+0	Apple	Ultrabook	8	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1	128.0	NaN	NaN	0
+1	Apple	Ultrabook	8	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0	NaN	NaN	128.0	0
+2	HP	Notebook	8	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0	256.0	NaN	NaN	0
+3	Apple	Ultrabook	16	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1	512.0	NaN	NaN	0
+4	Apple	Ultrabook	8	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1	256.0	NaN	NaN	0
+df['Hybrid'].value_counts()
+count
+Hybrid	
+0	1261
+1TB	9
+508GB	1
+
+dtype: int64
+df['Hybrid'].replace('1TB','1000GB',inplace=True)
+df['Hybrid']=df['Hybrid'].str.replace("GB"," ").astype(float)
+df.head(5)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD	FLASH Storage	Hybrid
+0	Apple	Ultrabook	8	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1	128.0	NaN	NaN	NaN
+1	Apple	Ultrabook	8	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0	NaN	NaN	128.0	NaN
+2	HP	Notebook	8	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0	256.0	NaN	NaN	NaN
+3	Apple	Ultrabook	16	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1	512.0	NaN	NaN	NaN
+4	Apple	Ultrabook	8	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1	256.0	NaN	NaN	NaN
+df.fillna(0,inplace=True)
+df.sample(5)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD	FLASH Storage	Hybrid
+295	Lenovo	Gaming	8	Nvidia GPU	3.20	69210.7200	141.21	2.8	Intel Core i7	0	1	0.0	1000.0	0.0	0.0
+356	Lenovo	Notebook	4	Intel GPU	2.20	17155.6272	100.45	1.1	Other Intel processors	0	0	0.0	1000.0	0.0	0.0
+169	HP	Notebook	4	Intel GPU	1.49	40173.1200	165.63	1.6	Intel Core i5	0	1	0.0	500.0	0.0	0.0
+578	MSI	Gaming	16	Nvidia GPU	4.14	145401.1200	127.34	2.9	Intel Core i7	0	0	512.0	1000.0	0.0	0.0
+1229	MSI	Gaming	8	Nvidia GPU	2.20	61218.7200	141.21	2.8	Intel Core i7	0	0	1000.0	0.0	0.0	0.0
+df.corr(numeric_only=True)['Price']
+Price
+Ram	0.740277
+Weight	0.211883
+Price	1.000000
+ppi	0.471507
+clock speed (Ghz)	0.427996
+Touchscreen	0.190423
+IPS Display	0.251594
+SSD	0.545266
+HDD	-0.074891
+FLASH Storage	-0.034591
+Hybrid	0.000434
+
+dtype: float64
+df.drop(columns=['Hybrid','FLASH Storage'],inplace=True)
+df.sample(5)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD
+325	Lenovo	Notebook	4	Intel GPU	1.44	15557.760	111.94	1.1	Other Intel processors	0	0	0.0	0.0
+318	HP	Notebook	8	Intel GPU	1.95	52214.400	157.35	2.5	Intel Core i5	0	0	256.0	0.0
+968	Dell	Gaming	32	Nvidia GPU	4.42	167778.720	127.34	2.8	Intel Core i7	0	1	256.0	1000.0
+605	MSI	Gaming	16	Nvidia GPU	1.80	122490.720	282.42	2.8	Intel Core i7	0	0	256.0	2000.0
+653	MSI	Gaming	8	Nvidia GPU	2.20	63499.104	141.21	2.8	Intel Core i7	0	0	128.0	1000.0
+df['Company'].value_counts().plot(kind='bar')
+plt.xlabel('Company')
+plt.ylabel('counts')
+plt.show()
+No description has been provided for this image
+sns.barplot(x=df['Company'],y=df['Price'])
+plt.xticks(rotation=90)
+plt.show()
+No description has been provided for this image
+df.head(5)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD
+0	Apple	Ultrabook	8	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1	128.0	0.0
+1	Apple	Ultrabook	8	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0	0.0	0.0
+2	HP	Notebook	8	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0	256.0	0.0
+3	Apple	Ultrabook	16	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1	512.0	0.0
+4	Apple	Ultrabook	8	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1	256.0	0.0
+Filtering the Features
+corr_df=df[['Ram','Gpu','Weight','ppi','clock speed (Ghz)','SSD','HDD','Price']]
+sns.heatmap(corr_df.corr(numeric_only=True,method='spearman'), annot=True, cmap='coolwarm')
+plt.show()
+No description has been provided for this image
+# Exclude the 'Price' variable from the correlation matrix
+correlation_matrix = df.drop('Price', axis=1).corr(numeric_only=True,method='spearman')
+
+correlation_threshold = 0.9
+
+# Find highly correlated independent variables
+correlated_columns = set()
+for i in range(len(correlation_matrix.columns)):
+    for j in range(i):
+        if abs(correlation_matrix.iloc[i, j]) > correlation_threshold:
+            correlated_columns.add(correlation_matrix.columns[i])
+
+correlated_columns
+set()
+data=df.copy()
+Checking the Feature Relationship with Target Variable
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy import stats
+import matplotlib.style as style
+style.use('fivethirtyeight')
+
+def see_linear(data, features):
+    num_features = len(features)
+    fig, axes = plt.subplots(nrows=3, ncols=3, figsize=(14, 12))
+    fig.suptitle("Regression Plots for Numerical Features")
+
+    axes = axes.flatten()
+
+    for i, feature in enumerate(features):
+        sns.regplot(x=data[feature], y=data['Price'], ax=axes[i])
+
+        axes[i].set_title(f'{feature} vs. Price')
+
+    for i in range(num_features, len(axes)):
+        axes[i].axis('off')
+
+    plt.tight_layout()
+    plt.show()
+
+features = ['Ram', 'Weight', 'ppi', 'clock speed (Ghz)','SSD', 'HDD']
+see_linear(data, features)
+No description has been provided for this image
+categorical_columns = data.select_dtypes(include=['object'])
+categorical_columns
+Company	TypeName	Gpu	processor
+0	Apple	Ultrabook	Intel GPU	Intel Core i5
+1	Apple	Ultrabook	Intel GPU	Intel Core i5
+2	HP	Notebook	Intel GPU	Intel Core i5
+3	Apple	Ultrabook	AMD GPU	Intel Core i7
+4	Apple	Ultrabook	Intel GPU	Intel Core i5
+...	...	...	...	...
+1269	Asus	Notebook	Nvidia GPU	Intel Core i7
+1270	Lenovo	2 in 1 Convertible	Intel GPU	Intel Core i7
+1271	Lenovo	2 in 1 Convertible	Intel GPU	Intel Core i7
+1272	Lenovo	Notebook	Intel GPU	Other Intel processors
+1273	HP	Notebook	AMD GPU	Intel Core i7
+1272 rows × 4 columns
+
+for column in  categorical_columns[1:]:
+    print("column name:", column)
+    print("value_count:")
+    print( data[column].value_counts())
+    print("\n")
+    print("\n")
+column name: Company
+value_count:
+Company
+Dell         291
+Lenovo       289
+HP           268
+Asus         151
+Acer         101
+MSI           54
+Toshiba       47
+Apple         21
+Samsung        8
+Razer          7
+Mediacom       7
+Microsoft      6
+Xiaomi         4
+Vero           4
+Chuwi          3
+Google         3
+Fujitsu        3
+LG             3
+Huawei         2
+Name: count, dtype: int64
+
+
+
+
+column name: TypeName
+value_count:
+TypeName
+Notebook              705
+Gaming                205
+Ultrabook             194
+2 in 1 Convertible    116
+Workstation            29
+Netbook                23
+Name: count, dtype: int64
+
+
+
+
+column name: Gpu
+value_count:
+Gpu
+Intel GPU     702
+Nvidia GPU    396
+AMD GPU       174
+Name: count, dtype: int64
+
+
+
+
+column name: processor
+value_count:
+processor
+Intel Core i7             515
+Intel Core i5             422
+Other Intel processors    141
+Intel Core i3             134
+AMD processor              60
+Name: count, dtype: int64
+
+
+
+
+Model Training and Checking Performance
+X = data.drop(columns=['Price'])
+y =(data['Price'])
+
+from sklearn.model_selection import train_test_split
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.15,random_state=2)
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.metrics import r2_score,mean_absolute_error
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
+from xgboost import XGBRegressor
+Linear Regression
+# Define the continuous columns that need scaling
+continuous_columns = ['Ram', 'Weight','ppi','clock speed (Ghz)', 'SSD','HDD']
+
+# Step 1: Preprocessing
+# Create transformers for categorical and continuous features
+categorical_transformer = OneHotEncoder(sparse_output=False, drop='first')
+continuous_transformer = StandardScaler()
+
+# Create a ColumnTransformer to apply the transformers to the appropriate columns
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', categorical_transformer, categorical_columns.columns),
+        ('cont', continuous_transformer, continuous_columns)
+    ],
+    remainder='passthrough'
+)
+
+# Step 2: Linear Regression Model
+model = LinearRegression()
+
+# Create the full pipeline
+pipe = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', model)
+])
+
+# Fit the pipeline on the training data
+pipe.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = pipe.predict(X_test)
+
+# Evaluate the model
+print('R2 score:', r2_score(y_test, y_pred))
+print('MAE:', mean_absolute_error(y_test, y_pred))
+R2 score: 0.6440284655840505
+MAE: 15340.960946930094
+DecisionTree
+# Define the continuous columns that need scaling
+continuous_columns = ['Ram', 'Weight','ppi','clock speed (Ghz)', 'SSD','HDD']
+
+# Step 1: Preprocessing
+# Create transformers for categorical and continuous features
+categorical_transformer = OneHotEncoder(sparse_output=False, drop='first')
+continuous_transformer = StandardScaler()
+
+# Create a ColumnTransformer to apply the transformers to the appropriate columns
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', categorical_transformer, categorical_columns.columns),
+        ('cont', continuous_transformer, continuous_columns)
+    ],
+    remainder='passthrough'
+)
+
+# Step 2: Decision Tree Model
+model =  DecisionTreeRegressor(max_depth=9)
+
+# Create the full pipeline
+pipe = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', model)
+])
+
+# Fit the pipeline on the training data
+pipe.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = pipe.predict(X_test)
+
+# Evaluate the model
+print('R2 score:', r2_score(y_test, y_pred))
+print('MAE:', mean_absolute_error(y_test, y_pred))
+R2 score: 0.6380490836942851
+MAE: 13925.333607521297
+RandomForest
+# Define the continuous columns that need scaling
+continuous_columns = ['Ram', 'Weight','ppi','clock speed (Ghz)', 'SSD','HDD']
+
+# Step 1: Preprocessing
+# Create transformers for categorical and continuous features
+categorical_transformer = OneHotEncoder(sparse_output=False, drop='first')
+continuous_transformer = StandardScaler()
+
+# Create a ColumnTransformer to apply the transformers to the appropriate columns
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', categorical_transformer, categorical_columns.columns),
+        ('cont', continuous_transformer, continuous_columns)
+    ],
+    remainder='passthrough'
+)
+
+# Step 2: Random Forest Model
+model = RandomForestRegressor(n_estimators=100,
+                              random_state=3,
+                              max_samples=0.5,
+                              max_features=0.75,
+                              max_depth=15)
+
+# Create the full pipeline
+pipe = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', model)
+])
+
+# Fit the pipeline on the training data
+pipe.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = pipe.predict(X_test)
+
+# Evaluate the model
+print('R2 score:', r2_score(y_test, y_pred))
+print('MAE:', mean_absolute_error(y_test, y_pred))
+R2 score: 0.7320150063953722
+MAE: 11938.421708308577
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+def plot_dis(y, yhat):
+    plt.figure()
+    sns.kdeplot(y, color="r", label="Actual Value", common_norm=False)
+    sns.kdeplot(yhat, color="b", label="Pred Values", common_norm=False)
+    plt.legend()
+
+    plt.title('Actual vs Pred Values')
+
+    plt.show()
+Final MODEL SELECTION
+X = data.drop(columns=['Price'])
+y =(data['Price'])
+
+
+X_train,X_test,y_train,y_test = train_test_split(X,y,test_size=0.15,random_state=1)
+
+
+# Define the continuous columns that need scaling
+continuous_columns = ['Ram', 'Weight','ppi','clock speed (Ghz)', 'SSD','HDD']
+
+# Step 1: Preprocessing
+# Create transformers for categorical and continuous features
+categorical_transformer = OneHotEncoder(sparse_output=False, drop='first')
+continuous_transformer = StandardScaler()
+
+# Create a ColumnTransformer to apply the transformers to the appropriate columns
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('cat', categorical_transformer, categorical_columns.columns),
+        ('cont', continuous_transformer, continuous_columns)
+    ],
+    remainder='passthrough'
+)
+
+
+model = RandomForestRegressor(n_estimators=100,
+                              random_state=3,
+                              max_samples=0.5,
+                              max_features=0.75,
+                              max_depth=15)
+
+# Create the full pipeline
+pipe = Pipeline([
+    ('preprocessor', preprocessor),
+    ('model', model)
+])
+
+# Fit the pipeline on the training data
+pipe.fit(X_train, y_train)
+
+# Make predictions on the test data
+y_pred = pipe.predict(X_test)
+
+# Evaluate the model
+print('R2 score:', r2_score(y_test, y_pred))
+print('MAE:', mean_absolute_error(y_test, y_pred))
+
+print(y_pred)
+R2 score: 0.858444530984503
+MAE: 9140.228439780918
+[ 89358.06967329  33553.15333611  25094.14333     26954.6860656
+  71146.60870419  73081.62814934  67993.56572926  79160.0787264
+  36926.024568   107414.232912   125007.756       14464.91108571
+  83448.90820591  74773.37515147  56966.52234938 109103.652468
+  60480.08205734 120812.294328    32642.035512    34818.410736
+  28180.36793143  60266.11141189  58055.35635029  25940.941536
+  67693.183056    61119.44565568  30092.34864     69731.61726386
+  52043.168736    73626.639216    68713.57091657  22710.2273952
+  70201.0698218   47554.08370451  63492.0859584   28538.277378
+  17489.5066752   39088.014192    61524.92494463  24498.16238046
+  27188.319946   123608.56941257  26392.53327    107330.679216
+  38195.939604   152629.463088    74566.10850301 126923.746536
+  35889.16825845  39466.29610286  77984.72548686  24328.4559764
+ 111902.097888    98736.22633916  48329.37336     41965.23793889
+  16932.1596912   63453.77490764  34479.629856    25714.639176
+  40408.59734233  73900.53160183  43934.22759116  52570.60295267
+  35243.477688    30217.44394011  32570.2511904   44610.370752
+  34392.8196864   40572.091296    29908.8728328   28935.96580886
+  94370.88132    103268.74781169  61739.09879428  15357.00096
+  31793.50588246  42935.947888    20597.39201018  56198.80863899
+  22886.76957886  56552.2175599   65531.42961463  52797.3397075
+  35073.1958736   51587.5140066   57888.81864946  22333.4312796
+  60988.25723653  63112.04178284  47990.40042139  33718.83665318
+  43940.053296    25340.81565406 111065.21732057  19368.54992413
+  52474.57954797  73574.49737829  80842.60813842  74749.09531886
+ 126436.5188736   88444.1907587  105319.99860792  28538.277378
+  89151.011304    14236.05893053  83165.30834584  65858.12441064
+  37631.293704    20608.97547429 114580.632672    27626.6951076
+  93843.872301    22092.38630766  44524.7931264   31004.75138743
+  81045.94378629 122546.498832    38743.321008    34221.136608
+  84744.38961186  34966.002552    60321.88434714  68988.38309703
+  27170.471072    49569.15733853  79769.943392   109848.835872
+  64058.60725943  43940.053296    52144.97149458  71085.04869766
+  78198.55456226  47070.45202067  34242.50310583  92026.87101801
+  45237.64671804  51300.63500448 121971.95078057  21626.3189072
+  37340.22590126  73654.58078952  31826.675688    63433.35439201
+  64350.64339979  40283.4636899   49294.41980564  38441.19385029
+  94556.87296757  52420.1055552   56703.25737943  52879.82514526
+  48723.80357916  28538.277378    35994.393576   142786.1901696
+  81032.851368    48830.64046913  36757.528344    61932.69217029
+ 123099.076368    94384.89168633  33455.504784    84147.54473143
+  37510.815192   101777.249982    54402.48783636 115332.552
+ 111902.097888    30614.12644246  95458.14408     16219.859016
+  29918.5766304   92898.64981886 164228.5166016   63598.29279811
+  60481.81659876 108906.365952    35017.02935983  70217.67965143
+  38702.97631371  76870.4343072   89200.18027161  84964.70753371
+  84744.38961186  40305.74723949  58303.10167236  82201.51049143
+ 163158.7358976   53126.16867756  16219.859016  ]
+plot_dis(y_test, y_pred)
+No description has been provided for this image
+# Create a scatter plot of true vs. predicted values
+
+plt.scatter(y_test, y_pred)
+
+plt.title('True vs. Predicted Values (Scatter Plot)')
+
+# Show the plot
+plt.show()
+No description has been provided for this image
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Create a scatter plot of true vs. predicted values
+plt.figure(figsize=(6,6))
+plt.scatter(y_test, y_pred, color='m')
+
+# Add a regression line using Seaborn's regplot
+sns.regplot(x=y_test, y=y_pred, scatter=False, color='red')
+
+plt.title('True vs. Predicted Values (Scatter Plot with Regression Line)')
+
+# Show the plot
+plt.show()
+No description has been provided for this image
+Inference
+!pip install gradio -q
+import gradio as gr
+import pandas as pd
+
+# List of dropdown options
+companies = ['Apple', 'HP', 'Acer', 'Asus', 'Dell', 'Lenovo', 'Chuwi', 'MSI',
+             'Microsoft', 'Toshiba', 'Huawei', 'Xiaomi', 'Vero', 'Razer',
+             'Mediacom', 'Samsung', 'Google', 'Fujitsu', 'LG']
+type_names = ['Ultrabook', 'Notebook', 'Netbook', 'Gaming', '2 in 1 Convertible', 'Workstation']
+gpus = ['Intel GPU', 'AMD GPU', 'Nvidia GPU']
+processors = ['Intel Core i5', 'Intel Core i7', 'AMD processor', 'Intel Core i3', 'Other Intel processors']
+
+# Function to predict price
+def predict_price(company, typename, ram, gpu, weight, ppi, clock_speed, processor, touchscreen, ips_display, ssd, hdd):
+    # Prepare input data as a DataFrame
+    input_data = pd.DataFrame({
+        'Company': [company],
+        'TypeName': [typename],
+        'Ram': [ram],
+        'Gpu': [gpu],
+        'Weight': [weight],
+        'ppi': [ppi],
+        'clock speed (Ghz)': [clock_speed],
+        'processor': [processor],
+        'Touchscreen': [1 if touchscreen else 0],
+        'IPS Display': [1 if ips_display else 0],
+        'SSD': [ssd],
+        'HDD': [hdd]
+    })
+
+    # Use the pipeline to predict the price
+    if pipe:
+        predicted_price = pipe.predict(input_data)[0]  # Assuming the pipeline has a predict method
+        return f"Predicted Price: Rs{predicted_price:.2f}"
+    else:
+        return "Pipeline not loaded. Please load your trained model pipeline."
+
+# Create Gradio interface
+with gr.Blocks() as demo:
+    with gr.Row():
+        company_dropdown = gr.Dropdown(choices=companies, label="Company")
+        typename_dropdown = gr.Dropdown(choices=type_names, label="Type Name")
+    with gr.Row():
+        gpu_dropdown = gr.Dropdown(choices=gpus, label="GPU")
+        processor_dropdown = gr.Dropdown(choices=processors, label="Processor")
+    with gr.Row():
+        ram_input = gr.Number(label="RAM (GB)", value=8)
+        weight_input = gr.Number(label="Weight (kg)", value=1.5)
+    with gr.Row():
+        ppi_input = gr.Number(label="PPI", value=150)
+        clock_speed_input = gr.Number(label="Clock Speed (GHz)", value=2.5)
+    with gr.Row():
+        touchscreen_checkbox = gr.Checkbox(label="Touchscreen")
+        ips_display_checkbox = gr.Checkbox(label="IPS Display")
+    with gr.Row():
+        ssd_input = gr.Number(label="SSD (GB)", value=256)
+        hdd_input = gr.Number(label="HDD (GB)", value=0)
+    predict_button = gr.Button("Predict")
+    output = gr.Textbox(label="Prediction Output")
+
+    # Link function to button
+    predict_button.click(
+        fn=predict_price,
+        inputs=[
+            company_dropdown,
+            typename_dropdown,
+            ram_input,
+            gpu_dropdown,
+            weight_input,
+            ppi_input,
+            clock_speed_input,
+            processor_dropdown,
+            touchscreen_checkbox,
+            ips_display_checkbox,
+            ssd_input,
+            hdd_input
+        ],
+        outputs=output
+    )
+
+demo.launch()
+Running Gradio in a Colab notebook requires sharing enabled. Automatically setting `share=True` (you can turn this off by setting `share=False` in `launch()` explicitly).
+
+Colab notebook detected. To show errors in colab notebook, set debug=True in launch()
+* Running on public URL: https://dbe6a2108535698709.gradio.live
+
+This share link expires in 72 hours. For free permanent hosting and GPU upgrades, run `gradio deploy` from the terminal in the working directory to deploy to Hugging Face Spaces (https://huggingface.co/spaces)
+
+df.head(10)
+Company	TypeName	Ram	Gpu	Weight	Price	ppi	clock speed (Ghz)	processor	Touchscreen	IPS Display	SSD	HDD
+0	Apple	Ultrabook	8	Intel GPU	1.37	71378.6832	226.98	2.3	Intel Core i5	0	1	128.0	0.0
+1	Apple	Ultrabook	8	Intel GPU	1.34	47895.5232	127.68	1.8	Intel Core i5	0	0	0.0	0.0
+2	HP	Notebook	8	Intel GPU	1.86	30636.0000	141.21	2.5	Intel Core i5	0	0	256.0	0.0
+3	Apple	Ultrabook	16	AMD GPU	1.83	135195.3360	220.53	2.7	Intel Core i7	0	1	512.0	0.0
+4	Apple	Ultrabook	8	Intel GPU	1.37	96095.8080	226.98	3.1	Intel Core i5	0	1	256.0	0.0
+5	Acer	Notebook	4	AMD GPU	2.10	21312.0000	100.45	3.0	AMD processor	0	0	0.0	500.0
+6	Apple	Ultrabook	16	Intel GPU	2.04	114017.6016	220.53	2.2	Intel Core i7	0	1	0.0	0.0
+7	Apple	Ultrabook	8	Intel GPU	1.34	61735.5360	127.68	1.8	Intel Core i5	0	0	0.0	0.0
+8	Asus	Ultrabook	16	Nvidia GPU	1.30	79653.6000	157.35	1.8	Intel Core i7	0	0	512.0	0.0
+9	Acer	Ultrabook	8	Intel GPU	1.60	41025.6000	157.35	1.6	Intel Core i5	0	1	256.0	0.0
+ 
